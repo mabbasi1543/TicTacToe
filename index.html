@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./script.js" defer></script>
+    <link rel="stylesheet" href="./style.css">
+    <title>TTT</title>
+</head>
+<body>
+        <div class="container">
+            <nav>
+                Tic Tac Toe
+            </nav>
+            <div id="interface">
+                <section id="stats">
+                    <div id="player1" class="scoreboard">
+                        <div id="p1Symbol" class="symbol"></div>
+                        <div id="p1Score" class="score"></div>
+
+                    </div>
+                    <div id="player2" class="scoreboard">
+                        <div id="p2Symbol" class="symbol"></div>
+                        <div id="p2Score" class="score"></div>
+
+                    </div>
+
+                </section>
+                <section id="board">
+                    <div class="card" id="card1"></div>
+                    <div class="card" id="card2"></div>
+                    <div class="card" id="card3"></div>
+                    <div class="card" id="card4"></div>
+                    <div class="card" id="card5"></div>
+                    <div class="card" id="card6"></div>
+                    <div class="card" id="card7"></div>
+                    <div class="card" id="card8"></div>
+                    <div class="card" id="card9"></div>
+                </section>
+            </div>
+            <footer>
+                Designed By SottaByte
+            </footer>
+        </div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+          <form id="form">
+            <legend>Pick your symbol</legend><br>
+            <div>
+            <label class="symbol">
+                <input type="radio" id="X" name="symbol" value="X">
+                <p>X</p>
+            </label>
+            <label class="symbol">
+                <input type="radio" id="O" name="symbol" value="O">
+                <p>O</p>
+            </label>
+            </div><br>
+            <div>
+            <label for="AI">AI</label>
+            <input type="checkbox" id="AI" name="AI">
+            </div><br>
+            <div id="AIselected">
+            <label for="level">Choose the difficulty:</label>
+            <select id="level" name="level">
+              <option value="easy">easy</option>
+              <option value="medium">medium</option>
+              <option value="hard">hard</option>
+              <option value="unbeatable">unbeatable</option>
+            </select><br>
+            </div><br>
+            <button type="submit" id="startBtm">Start</button>
+          </form>
+        
+        </div>
+      
+      </div>
+</body>
+</html>
