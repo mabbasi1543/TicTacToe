@@ -54,37 +54,13 @@ const Player = (nameVar , symbolVar , turnVar ,AIVar = false) => {
     const moved = () => {moveCount++}
     
     const setDifficulty = (difficultyVar) => {difficulty = difficultyVar}
-    const validMoveChecker  = (card)=> {
-      if (gameBoard.getValue(card) == ""){
-        return true;
-      }
-    }
-    const possibleMoves  = (gameboard)=> {
-      const asArray = Object.entries(gameboard.getBoardState());
-      const filtered = asArray.filter(([key, value]) => validMoveChecker(key));
-      const justStrings = Object.fromEntries(filtered);
-      return justStrings;
-    }
-    const randomProperty = (obj) => {
-      let keys = Object.keys(obj);
-      return keys[ keys.length * Math.random() << 0];
-  };
-    const randomMove = (gameboard) => {
-      return randomProperty(possibleMoves(gameboard));
-    }
-    const move = (gameboard) => {
-      if (difficulty = "easy"){
-        moved();
-        return randomMove(gameboard);
-      } else if (difficulty = "medium"){
+    const getDifficulty = () => {return difficulty}
 
-      } else if (difficulty = "hard"){
 
-      }
-    }
     return {
-      move,
+      moved,
       setDifficulty,
+      getDifficulty,
     }
   })();
 
@@ -112,7 +88,120 @@ const Player = (nameVar , symbolVar , turnVar ,AIVar = false) => {
         document.getElementById(card).innerText = value;
         }
       };
+      const validMoveChecker  = (card)=> {
+        if (getValue(card) == ""){
+          return true;
+        }
+      }
+      const possibleMoves  = ()=> {
+        const asArray = Object.entries(boardState);
+        const filtered = asArray.filter(([key, value]) => validMoveChecker(key));
+        const justStrings = Object.fromEntries(filtered);
+        return justStrings;
+      }
+      const randomProperty = (obj) => {
+        let keys = Object.keys(obj);
+        return keys[ keys.length * Math.random() << 0];
+    };
+      const randomMove = () => {
+        return randomProperty(possibleMoves());
+      }
+      const move = () => {
+        if (AI.getDifficulty() == "easy"){
+          AI.moved();
+          return randomMove();
+        } else if (AI.getDifficulty() == "medium"){
+  
+        } else if (AI.getDifficulty() == "hard"){
+            let symbol = players[0].getSymbol();
+  
+            if (getValue("card1") == symbol && getValue("card2") == symbol && getValue("card3") == ""){
+              AI.moved();
+              return "card3";
+            } else if (getValue("card4") == symbol && getValue("card5") == symbol && getValue("card6") == ""){
+                  AI.moved();
+                return "card6";
+            } else if (getValue("card7") == symbol && getValue("card8") == symbol && getValue("card9") == ""){
+                  AI.moved();
+                return "card9";
+  
+            } else if (getValue("card2") == symbol && getValue("card3") == symbol && getValue("card1") == ""){
+                  AI.moved();
+                return "card1";
+            } else if (getValue("card5") == symbol && getValue("card6") == symbol && getValue("card4") == ""){
+                  AI.moved();
+                return "card4";
+            } else if (getValue("card8") == symbol && getValue("card9") == symbol && getValue("card7") == ""){
+                  AI.moved();
+                return "card7";
+  
+            } else if (getValue("card1") == symbol && getValue("card3") == symbol && getValue("card2") == ""){
+                  AI.moved();
+                return "card2";
+            } else if (getValue("card4") == symbol && getValue("card6") == symbol && getValue("card5") == ""){
+                  AI.moved();
+                return "card5";
+            } else if (getValue("card7") == symbol && getValue("card9") == symbol && getValue("card8") == ""){
+                  AI.moved();
+                return "card8";
+  
+            } else if (getValue("card1") == symbol && getValue("card5") == symbol && getValue("card9") == ""){
+                  AI.moved();
+                return "card9";
+            } else if (getValue("card5") == symbol && getValue("card9") == symbol && getValue("card1") == ""){
+                  AI.moved();
+                return "card1";
+            } else if (getValue("card1") == symbol && getValue("card9") == symbol && getValue("card5") == ""){
+                  AI.moved();
+                return "card5";
+  
+              } else if (getValue("card3") == symbol && getValue("card5") == symbol && getValue("card7") == ""){
+                  AI.moved();
+                return "card7";
+            } else if (getValue("card5") == symbol && getValue("car7") == symbol && getValue("card3") == ""){
+                  AI.moved();
+                return "card3";
+            } else if (getValue("card3") == symbol && getValue("card7") == symbol && getValue("card5") == ""){
+                  AI.moved();
+                return "card5";
 
+              } else if (getValue("card1") == symbol && getValue("card4") == symbol && getValue("card7") == ""){
+                AI.moved();
+              return "card7";
+          } else if (getValue("card2") == symbol && getValue("car5") == symbol && getValue("card8") == ""){
+                AI.moved();
+              return "card8";
+          } else if (getValue("card3") == symbol && getValue("card6") == symbol && getValue("card9") == ""){
+                AI.moved();
+              return "card9";
+
+            } else if (getValue("card1") == symbol && getValue("card7") == symbol && getValue("card4") == ""){
+              AI.moved();
+            return "card4";
+        } else if (getValue("card2") == symbol && getValue("car8") == symbol && getValue("card5") == ""){
+              AI.moved();
+            return "card5";
+        } else if (getValue("card3") == symbol && getValue("card9") == symbol && getValue("card6") == ""){
+              AI.moved();
+            return "card6";
+
+          } else if (getValue("card4") == symbol && getValue("card7") == symbol && getValue("card1") == ""){
+            AI.moved();
+          return "card1";
+      } else if (getValue("card5") == symbol && getValue("car8") == symbol && getValue("card2") == ""){
+            AI.moved();
+          return "card2";
+      } else if (getValue("card6") == symbol && getValue("card9") == symbol && getValue("card3") == ""){
+            AI.moved();
+          return "card3";
+
+
+            } else {
+              AI.moved();
+              return randomMove();
+            }
+        }
+      }
   const resetboardState = () => {
         for ( i in boardState) {
          setValue(i.toString() , "");
@@ -122,7 +211,11 @@ const Player = (nameVar , symbolVar , turnVar ,AIVar = false) => {
     if (checkForWin(players[index].getSymbol()) == players[index].getSymbol()) { 
       players[index].win();
       displayController.restart(gameBoard);
+
+    } else if (Object.keys(gameBoard.possibleMoves()).length === 0) {
+      displayController.restart(gameBoard);
     }
+    
   }
   const processTurn = (e) =>{ 
     if (boardState[e.target.id] == ""){
@@ -131,7 +224,7 @@ const Player = (nameVar , symbolVar , turnVar ,AIVar = false) => {
         displayController.render(gameBoard);
         playerWinProcess(0)
         if (players[1].getAI()){
-          setValue(AI.move(gameBoard) , players[1].getSymbol());
+          setValue(move() , players[1].getSymbol());
           displayController.render(gameBoard);
           playerWinProcess("1")
         } else {
@@ -176,6 +269,7 @@ const Player = (nameVar , symbolVar , turnVar ,AIVar = false) => {
      setValue,
      resetboardState,
      processTurn,
+     possibleMoves,
     };
   })();
 
