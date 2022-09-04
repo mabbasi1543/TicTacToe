@@ -10,42 +10,83 @@ const p2Score = document.getElementById('p2Score');
 let players = [];
 
 
-const Player = (nameVar , symbolVar , turnVar) => {
+const Player = (nameVar , symbolVar , turnVar ,AIVar = false) => {
     let name = nameVar; 
     let symbol = symbolVar;
     let turn = turnVar; 
     let streak = 0;
+    let AI = AIVar;
     const getName = () => { return name};
     const getSymbol = () => { return symbol ? "O" : "X"};
     const getSymbolBool = () => { return symbol};
     const getTurn = () => { return turn};
     const getStreak = () => { return streak};
+    const getAI = () => { return AI};
 
-    const setName = () => { this.name = name};
-    const setSymbol = () => { if (symbol == "O") this.symbol = true; else this.symbol = false; };
-    const setSymbolBool = (symbol) => { this.symbol = symbol};
-    const setTurn = (turn) => { this.turn = turn};
-    const setStreak = (streak) => { this.streak = streak};
+
+    const setName = () => { name = name};
+    const setSymbol = () => { if (symbol == "O") symbol = true; else symbol = false; };
+    const setSymbolBool = (symbol) => { symbol = symbol};
+    const setTurn = (turn) => { turn = turn};
+    const setStreak = (streak) => { streak = streak};
     const endTurn = () => { turn =  !turn};
     const win = () => { streak++};
 
     return {
-       getName,
-       getSymbol,
-       getSymbolBool,
-       getTurn,
-       getStreak,
-  
-       setName,
-       setSymbol,
-       setSymbolBool,
-       setTurn,
-       setStreak,
-       endTurn,
-       win,
+      getName,
+      getSymbol,
+      getSymbolBool,
+      getTurn,
+      getStreak,
+      getAI,
+      setName,
+      setSymbol,
+      setSymbolBool,
+      setTurn,
+      setStreak,
+      endTurn,
+      win,
     };
   };
+  const AI = (() => {
+    let difficulty = "easy";
+    let moveCount = 0;
+    const moved = () => {moveCount++}
+    
+    const setDifficulty = (difficultyVar) => {difficulty = difficultyVar}
+    const validMoveChecker  = (card)=> {
+      if (gameBoard.getValue(card) == ""){
+        return true;
+      }
+    }
+    const possibleMoves  = (gameboard)=> {
+      const asArray = Object.entries(gameboard.getBoardState());
+      const filtered = asArray.filter(([key, value]) => validMoveChecker(key));
+      const justStrings = Object.fromEntries(filtered);
+      return justStrings;
+    }
+    const randomProperty = (obj) => {
+      let keys = Object.keys(obj);
+      return keys[ keys.length * Math.random() << 0];
+  };
+    const randomMove = (gameboard) => {
+      return randomProperty(possibleMoves(gameboard));
+    }
+    const move = (gameboard) => {
+      if (difficulty = "easy"){
+        moved();
+        return randomMove(gameboard);
+      } else if (difficulty = "medium"){
 
+      } else if (difficulty = "hard"){
+
+      }
+    }
+    return {
+      move,
+      setDifficulty,
+    }
+  })();
 
   const gameBoard = (() => {
     const boardState = {
@@ -77,37 +118,39 @@ const Player = (nameVar , symbolVar , turnVar) => {
          setValue(i.toString() , "");
         }
       };
-
-  const processTurn = (e) =>{ 
-    if (boardState[e.target.id] == ""){
-    let playerIndex ;
-    if(players[0].getTurn()) {
-      playerIndex= 0 
-      players[0].endTurn();
-      p1Symbol.classList.remove('turn');
-      players[1].endTurn();
-      p2Symbol.classList.add('turn');
-
-    } else {
-      playerIndex  =1;
-      players[1].endTurn();
-      p2Symbol.classList.remove('turn');
-
-      players[0].endTurn();
-      p1Symbol.classList.add('turn');
-
-    } 
-    
-    setValue(e.target.id , players[playerIndex].getSymbol());
-    displayController.render(gameBoard)
-    if (checkForWin(players[0].getSymbol()) == players[0].getSymbol()) { 
-      players[0].win();
+  const playerWinProcess = (index) => {
+    if (checkForWin(players[index].getSymbol()) == players[index].getSymbol()) { 
+      players[index].win();
       displayController.restart(gameBoard);
     }
-    if (checkForWin(players[1].getSymbol()) == players[1].getSymbol()) {
-    players[1].win();
-    displayController.restart(gameBoard);
-    }
+  }
+  const processTurn = (e) =>{ 
+    if (boardState[e.target.id] == ""){
+      if(players[0].getTurn()) {
+        setValue(e.target.id , players[0].getSymbol());
+        displayController.render(gameBoard);
+        playerWinProcess(0)
+        if (players[1].getAI()){
+          setValue(AI.move(gameBoard) , players[1].getSymbol());
+          displayController.render(gameBoard);
+          playerWinProcess("1")
+        } else {
+
+        players[0].endTurn();
+        p1Symbol.classList.remove('turn');
+        players[1].endTurn();
+        p2Symbol.classList.add('turn');
+
+      }
+    }else if(players[1].getTurn()) {
+        setValue(e.target.id , players[1].getSymbol());
+        displayController.render(gameBoard);
+        playerWinProcess(1)
+        players[1].endTurn();
+        p2Symbol.classList.remove('turn');
+        players[0].endTurn();
+        p1Symbol.classList.add('turn');
+      } 
     }
   }
 
@@ -159,13 +202,14 @@ const Player = (nameVar , symbolVar , turnVar) => {
     const getStartData = (e , gameboard) => {
       const formData = new FormData(e.target);
       const formProps = Object.fromEntries(formData);
-      let AI
-      formProps.AI == "on" ? AI = true : AI = false;
+      let AIBool
+      formProps.AI == "on" ? AIBool = true : AIBool = false;
       let symbol;
       if(formProps.symbol == "O"){ symbol = true} else {symbol = false};
-      if (AI){
+      if (AIBool){
         players.push(Player("player1" , symbol , true))
-        players.push(Player("AI" , !symbol, false))
+        players.push(Player("AI" , !symbol, false ,true))
+        AI.setDifficulty(formProps.level);
       } else {
         players.push(Player("player1" , symbol , true))
         players.push(Player("player2" , !symbol , false))
@@ -194,22 +238,23 @@ const Player = (nameVar , symbolVar , turnVar) => {
         p1Symbol.classList.add('turn');
 
       });
-      
-      const btn = document.getElementById("restartBtn");
-      btn.addEventListener("click" , () => start(gameboard))
 
-        
-      const AI = document.getElementById('AI');
+      const AIelement = document.getElementById('AI');
       
       const AIselected = document.getElementById('AIselected');
-      
-      AI.addEventListener('click', function handleClick() {
-        if (AI.checked) {
+      AIelement.addEventListener('click', () =>{
+        if (AIelement.checked) {
           AIselected.style.display = 'block';
         } else {
           AIselected.style.display = 'none';
         }
       });
+
+      const btn = document.getElementById("restartBtn");
+      btn.addEventListener("click" , () => {start(gameboard)})
+
+        
+
         
         }
 
@@ -226,5 +271,3 @@ const Player = (nameVar , symbolVar , turnVar) => {
 
 
 
-
-  
