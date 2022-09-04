@@ -7,7 +7,7 @@ const p2Symbol = document.getElementById('p2Symbol');
 const p1Score = document.getElementById('p1Score');
 const p2Score = document.getElementById('p2Score');
 
-const players = [];
+let players = [];
 
 
 const Player = (nameVar , symbolVar , turnVar) => {
@@ -27,7 +27,7 @@ const Player = (nameVar , symbolVar , turnVar) => {
     const setTurn = (turn) => { this.turn = turn};
     const setStreak = (streak) => { this.streak = streak};
     const endTurn = () => { turn =  !turn};
-    const win = () => { this.streak++};
+    const win = () => { streak++};
 
     return {
        getName,
@@ -66,7 +66,7 @@ const Player = (nameVar , symbolVar , turnVar) => {
 
   const getValue = (card) =>{ return boardState[card]};
   const setValue = (card , value) =>{ 
-        if (value == "X" || value == "O"){
+        if (value == "X" || value == "O" || value == ""){
         boardState[card] = value;
         document.getElementById(card).innerText = value;
         }
@@ -80,7 +80,6 @@ const Player = (nameVar , symbolVar , turnVar) => {
 
   const processTurn = (e) =>{ 
     if (boardState[e.target.id] == ""){
-    console.log(boardState[e.target.id])
     let playerIndex ;
     if(players[0].getTurn()) {
       playerIndex= 0 
@@ -101,7 +100,31 @@ const Player = (nameVar , symbolVar , turnVar) => {
     
     setValue(e.target.id , players[playerIndex].getSymbol());
     displayController.render(gameBoard)
+    if (checkForWin(players[0].getSymbol()) == players[0].getSymbol()) { 
+      players[0].win();
+      displayController.restart(gameBoard);
+    }
+    if (checkForWin(players[1].getSymbol()) == players[1].getSymbol()) {
+    players[1].win();
+    displayController.restart(gameBoard);
+    }
+    }
+  }
 
+  const checkForWin = (value) => {
+    if((getValue("card1") == value && getValue("card2") == value && getValue("card3") == value)
+      || (getValue("card4") == value && getValue("card5") == value && getValue("card6") == value)
+      || (getValue("card7") == value && getValue("card8") == value && getValue("card9") == value)
+ 
+      || (getValue("card1") == value && getValue("card4") == value && getValue("card7") == value)
+      || (getValue("card2") == value && getValue("card5") == value && getValue("card8") == value)
+      || (getValue("card3") == value && getValue("card6") == value && getValue("card9") == value)
+ 
+      || (getValue("card1") == value && getValue("card5") == value && getValue("card9") == value)
+      || (getValue("card3") == value && getValue("card5") == value && getValue("card7") == value)
+    ) {
+
+      return value;
     }
   }
     return {
@@ -150,44 +173,50 @@ const Player = (nameVar , symbolVar , turnVar) => {
       render(gameboard);
       addListener(gameboard);
     };
+    const restart = (gameboard) => {
+      gameboard.resetboardState();
 
+      render(gameboard);
+    }
     const start = (gameboard) => {
-          gameboard.resetboardState();
-          
-          form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            getStartData(e ,gameboard);
-            document.getElementById("modal").style.display = "none";
-            document.getElementById("form").reset()
-            p1Symbol.classList.add('turn');
+      
+      players = []
+      document.getElementById("modal").style.display = "block";
+      
+      gameboard.resetboardState();
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        getStartData(e ,gameboard);
+        document.getElementById("modal").style.display = "none";
+        document.getElementById("form").reset()
+        p2Symbol.classList.remove('turn');
 
-          });
-          
-          // Get the modal
-          var modal = document.getElementById("modal");
-          
-          // Get the button that opens the modal
-          var btn = document.getElementById("restartBtn");
-        
+        p1Symbol.classList.add('turn');
+
+      });
+      
+      const btn = document.getElementById("restartBtn");
+      btn.addEventListener("click" , () => start(gameboard))
 
         
-        const AI = document.getElementById('AI');
-        
-        const AIselected = document.getElementById('AIselected');
-        
-        AI.addEventListener('click', function handleClick() {
-          if (AI.checked) {
-            AIselected.style.display = 'block';
-          } else {
-            AIselected.style.display = 'none';
-          }
-        });
+      const AI = document.getElementById('AI');
+      
+      const AIselected = document.getElementById('AIselected');
+      
+      AI.addEventListener('click', function handleClick() {
+        if (AI.checked) {
+          AIselected.style.display = 'block';
+        } else {
+          AIselected.style.display = 'none';
+        }
+      });
         
         }
 
     return {
       render,
       start,
+      restart
     };
   })();
 
