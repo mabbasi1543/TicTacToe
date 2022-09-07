@@ -9,63 +9,51 @@ const p2Score = document.getElementById('p2Score');
 
 let players = [];
 
-
-const Player = (nameVar, symbolVar, turnVar, AIVar = false) => {
-  let name = nameVar;
-  let symbol = symbolVar;
-  let turn = turnVar;
-  let streak = 0;
-  let AI = AIVar;
-  const getName = () => { return name };
-  const getSymbol = () => { return symbol ? "O" : "X" };
-  const getSymbolBool = () => { return symbol };
-  const getTurn = () => { return turn };
-  const getStreak = () => { return streak };
-  const getAI = () => { return AI };
-
-
-  const setName = () => { name = name };
-  const setSymbol = () => { if (symbol == "O") symbol = true; else symbol = false; };
-  const setSymbolBool = (symbol) => { symbol = symbol };
-  const setTurn = (turn) => { turn = turn };
-  const setStreak = (streak) => { streak = streak };
-  const endTurn = () => { turn = !turn };
-  const win = () => { streak++ };
-
-  return {
-    getName,
-    getSymbol,
-    getSymbolBool,
-    getTurn,
-    getStreak,
-    getAI,
-    setName,
-    setSymbol,
-    setSymbolBool,
-    setTurn,
-    setStreak,
-    endTurn,
-    win,
-  };
-};
-const AI = (() => {
-  let difficulty = "easy";
-  let moveCount = 0;
-  const moved = () => { moveCount++ }
-
-  const setDifficulty = (difficultyVar) => { difficulty = difficultyVar }
-  const getDifficulty = () => { return difficulty }
-
-
-  return {
-    moved,
-    setDifficulty,
-    getDifficulty,
+class Player {
+  name;
+  symbol;
+  turn;
+  streak;
+  AI;
+  constructor(name, symbol, turn, AI = false) {
+    this.name = name;
+    this.symbol = symbol ? "O" : "X";
+    this.turn = turn;
+    this.streak = 0;
+    this.AI = AI;
   }
-})();
+  get name() { return this.name };
+  get symbol() { return this.symbol };
+  get symbolBool() { return this.symbol };
+  get turn() { return this.turn };
+  get streak() { return this.streak };
+  get AI() { return this.AI };
 
-const gameBoard = (() => {
-  const boardState = {
+
+  set name(name) { this.name = name };
+  set symbol(symbol) { if (symbol == "O") this.symbol = true; else this.symbol = false; };
+  set symbolBool(symbol) { this.symbol = symbol };
+  set turn(turn) { this.turn = turn };
+  set streak(streak) { this.streak = streak };
+  endTurn() { this.turn = !this.turn };
+  win() { this.streak++ };
+
+}
+
+
+class AI {
+  static difficulty = "easy";
+  static moveCount = 0;
+
+  static set difficulty(difficulty) { this.difficulty = difficulty }
+  static get difficulty() { return this.difficulty }
+
+  static moved = () => { this.moveCount++ }
+
+}
+
+class gameBoard {
+  static boardState = {
     card1: "",
     card2: "",
     card3: "",
@@ -77,247 +65,249 @@ const gameBoard = (() => {
     card9: "",
   };
 
-  const getBoardState = () => {
-    return boardState;
-  };
+  static get boardState() { return this.boardState; };
 
-  const getValue = (card) => { return boardState[card] };
-  const setValue = (card, value) => {
+  static getValue(card) { return this.boardState[card] };
+
+  static setValue(card, value) {
     if (value == "X" || value == "O" || value == "") {
-      boardState[card] = value;
+      this.boardState[card] = value;
       document.getElementById(card).innerText = value;
     }
   };
-  const validMoveChecker = (card) => {
-    if (getValue(card) == "") {
+
+  static validMoveChecker(card) {
+    if (this.getValue(card) == "") {
       return true;
     }
   }
-  const possibleMoves = () => {
-    const asArray = Object.entries(boardState);
-    const filtered = asArray.filter(([key, value]) => validMoveChecker(key));
+  static possibleMoves() {
+    const asArray = Object.entries(this.boardState);
+    const filtered = asArray.filter(([key, value]) => this.validMoveChecker(key));
     const justStrings = Object.fromEntries(filtered);
     return justStrings;
   }
-  const randomProperty = (obj) => {
+  static randomProperty(obj) {
     let keys = Object.keys(obj);
     return keys[keys.length * Math.random() << 0];
   };
-  const randomMove = () => {
-    return randomProperty(possibleMoves());
+
+  static randomMove() {
+    return this.randomProperty(this.possibleMoves());
   }
-  const move = () => { // Random move based on avalable spaces 
-    if (AI.getDifficulty() == "easy") {
+  static move() { // Random move based on available spaces 
+    if (AI.difficulty == "easy") {
       AI.moved();
-      return randomMove();
+      return this.randomMove();
 
-    } else if (AI.getDifficulty() == "medium") { // Try to win
-      let symbol = players[1].getSymbol();
+    } else if (AI.difficulty == "medium") { // Tries to win
+      let symbol = players[1].symbol;
 
-      if (getValue("card1") == symbol && getValue("card2") == symbol && getValue("card3") == "") {
+      if (this.getValue("card1") == symbol && this.getValue("card2") == symbol && this.getValue("card3") == "") {
         AI.moved();
         return "card3";
-      } else if (getValue("card4") == symbol && getValue("card5") == symbol && getValue("card6") == "") {
+      } else if (this.getValue("card4") == symbol && this.getValue("card5") == symbol && this.getValue("card6") == "") {
         AI.moved();
         return "card6";
-      } else if (getValue("card7") == symbol && getValue("card8") == symbol && getValue("card9") == "") {
+      } else if (this.getValue("card7") == symbol && this.getValue("card8") == symbol && this.getValue("card9") == "") {
         AI.moved();
         return "card9";
 
-      } else if (getValue("card2") == symbol && getValue("card3") == symbol && getValue("card1") == "") {
+      } else if (this.getValue("card2") == symbol && this.getValue("card3") == symbol && this.getValue("card1") == "") {
         AI.moved();
         return "card1";
-      } else if (getValue("card5") == symbol && getValue("card6") == symbol && getValue("card4") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("card6") == symbol && this.getValue("card4") == "") {
         AI.moved();
         return "card4";
-      } else if (getValue("card8") == symbol && getValue("card9") == symbol && getValue("card7") == "") {
+      } else if (this.getValue("card8") == symbol && this.getValue("card9") == symbol && this.getValue("card7") == "") {
         AI.moved();
         return "card7";
 
-      } else if (getValue("card1") == symbol && getValue("card3") == symbol && getValue("card2") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card3") == symbol && this.getValue("card2") == "") {
         AI.moved();
         return "card2";
-      } else if (getValue("card4") == symbol && getValue("card6") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card4") == symbol && this.getValue("card6") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
-      } else if (getValue("card7") == symbol && getValue("card9") == symbol && getValue("card8") == "") {
+      } else if (this.getValue("card7") == symbol && this.getValue("card9") == symbol && this.getValue("card8") == "") {
         AI.moved();
         return "card8";
 
-      } else if (getValue("card1") == symbol && getValue("card5") == symbol && getValue("card9") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card5") == symbol && this.getValue("card9") == "") {
         AI.moved();
         return "card9";
-      } else if (getValue("card5") == symbol && getValue("card9") == symbol && getValue("card1") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("card9") == symbol && this.getValue("card1") == "") {
         AI.moved();
         return "card1";
-      } else if (getValue("card1") == symbol && getValue("card9") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card9") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
 
-      } else if (getValue("card3") == symbol && getValue("card5") == symbol && getValue("card7") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card5") == symbol && this.getValue("card7") == "") {
         AI.moved();
         return "card7";
-      } else if (getValue("card5") == symbol && getValue("car7") == symbol && getValue("card3") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("car7") == symbol && this.getValue("card3") == "") {
         AI.moved();
         return "card3";
-      } else if (getValue("card3") == symbol && getValue("card7") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card7") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
 
-      } else if (getValue("card1") == symbol && getValue("card4") == symbol && getValue("card7") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card4") == symbol && this.getValue("card7") == "") {
         AI.moved();
         return "card7";
-      } else if (getValue("card2") == symbol && getValue("car5") == symbol && getValue("card8") == "") {
+      } else if (this.getValue("card2") == symbol && this.getValue("car5") == symbol && this.getValue("card8") == "") {
         AI.moved();
         return "card8";
-      } else if (getValue("card3") == symbol && getValue("card6") == symbol && getValue("card9") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card6") == symbol && this.getValue("card9") == "") {
         AI.moved();
         return "card9";
 
-      } else if (getValue("card1") == symbol && getValue("card7") == symbol && getValue("card4") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card7") == symbol && this.getValue("card4") == "") {
         AI.moved();
         return "card4";
-      } else if (getValue("card2") == symbol && getValue("car8") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card2") == symbol && this.getValue("car8") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
-      } else if (getValue("card3") == symbol && getValue("card9") == symbol && getValue("card6") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card9") == symbol && this.getValue("card6") == "") {
         AI.moved();
         return "card6";
 
-      } else if (getValue("card4") == symbol && getValue("card7") == symbol && getValue("card1") == "") {
+      } else if (this.getValue("card4") == symbol && this.getValue("card7") == symbol && this.getValue("card1") == "") {
         AI.moved();
         return "card1";
-      } else if (getValue("card5") == symbol && getValue("car8") == symbol && getValue("card2") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("car8") == symbol && this.getValue("card2") == "") {
         AI.moved();
         return "card2";
-      } else if (getValue("card6") == symbol && getValue("card9") == symbol && getValue("card3") == "") {
+      } else if (this.getValue("card6") == symbol && this.getValue("card9") == symbol && this.getValue("card3") == "") {
         AI.moved();
         return "card3";
 
 
       } else {
         AI.moved();
-        return randomMove();
+        return this.randomMove();
       }
 
 
 
-    } else if (AI.getDifficulty() == "hard") { // Try to not let the player to win 
-      let symbol = players[0].getSymbol();
+    } else if (AI.difficulty == "hard") { // Tries to not let the player to win 
+      let symbol = players[0].symbol;
 
-      if (getValue("card1") == symbol && getValue("card2") == symbol && getValue("card3") == "") {
+      if (this.getValue("card1") == symbol && this.getValue("card2") == symbol && this.getValue("card3") == "") {
         AI.moved();
         return "card3";
-      } else if (getValue("card4") == symbol && getValue("card5") == symbol && getValue("card6") == "") {
+      } else if (this.getValue("card4") == symbol && this.getValue("card5") == symbol && this.getValue("card6") == "") {
         AI.moved();
         return "card6";
-      } else if (getValue("card7") == symbol && getValue("card8") == symbol && getValue("card9") == "") {
+      } else if (this.getValue("card7") == symbol && this.getValue("card8") == symbol && this.getValue("card9") == "") {
         AI.moved();
         return "card9";
 
-      } else if (getValue("card2") == symbol && getValue("card3") == symbol && getValue("card1") == "") {
+      } else if (this.getValue("card2") == symbol && this.getValue("card3") == symbol && this.getValue("card1") == "") {
         AI.moved();
         return "card1";
-      } else if (getValue("card5") == symbol && getValue("card6") == symbol && getValue("card4") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("card6") == symbol && this.getValue("card4") == "") {
         AI.moved();
         return "card4";
-      } else if (getValue("card8") == symbol && getValue("card9") == symbol && getValue("card7") == "") {
+      } else if (this.getValue("card8") == symbol && this.getValue("card9") == symbol && this.getValue("card7") == "") {
         AI.moved();
         return "card7";
 
-      } else if (getValue("card1") == symbol && getValue("card3") == symbol && getValue("card2") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card3") == symbol && this.getValue("card2") == "") {
         AI.moved();
         return "card2";
-      } else if (getValue("card4") == symbol && getValue("card6") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card4") == symbol && this.getValue("card6") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
-      } else if (getValue("card7") == symbol && getValue("card9") == symbol && getValue("card8") == "") {
+      } else if (this.getValue("card7") == symbol && this.getValue("card9") == symbol && this.getValue("card8") == "") {
         AI.moved();
         return "card8";
 
-      } else if (getValue("card1") == symbol && getValue("card5") == symbol && getValue("card9") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card5") == symbol && this.getValue("card9") == "") {
         AI.moved();
         return "card9";
-      } else if (getValue("card5") == symbol && getValue("card9") == symbol && getValue("card1") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("card9") == symbol && this.getValue("card1") == "") {
         AI.moved();
         return "card1";
-      } else if (getValue("card1") == symbol && getValue("card9") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card9") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
 
-      } else if (getValue("card3") == symbol && getValue("card5") == symbol && getValue("card7") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card5") == symbol && this.getValue("card7") == "") {
         AI.moved();
         return "card7";
-      } else if (getValue("card5") == symbol && getValue("car7") == symbol && getValue("card3") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("car7") == symbol && this.getValue("card3") == "") {
         AI.moved();
         return "card3";
-      } else if (getValue("card3") == symbol && getValue("card7") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card7") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
 
-      } else if (getValue("card1") == symbol && getValue("card4") == symbol && getValue("card7") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card4") == symbol && this.getValue("card7") == "") {
         AI.moved();
         return "card7";
-      } else if (getValue("card2") == symbol && getValue("car5") == symbol && getValue("card8") == "") {
+      } else if (this.getValue("card2") == symbol && this.getValue("car5") == symbol && this.getValue("card8") == "") {
         AI.moved();
         return "card8";
-      } else if (getValue("card3") == symbol && getValue("card6") == symbol && getValue("card9") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card6") == symbol && this.getValue("card9") == "") {
         AI.moved();
         return "card9";
 
-      } else if (getValue("card1") == symbol && getValue("card7") == symbol && getValue("card4") == "") {
+      } else if (this.getValue("card1") == symbol && this.getValue("card7") == symbol && this.getValue("card4") == "") {
         AI.moved();
         return "card4";
-      } else if (getValue("card2") == symbol && getValue("car8") == symbol && getValue("card5") == "") {
+      } else if (this.getValue("card2") == symbol && this.getValue("car8") == symbol && this.getValue("card5") == "") {
         AI.moved();
         return "card5";
-      } else if (getValue("card3") == symbol && getValue("card9") == symbol && getValue("card6") == "") {
+      } else if (this.getValue("card3") == symbol && this.getValue("card9") == symbol && this.getValue("card6") == "") {
         AI.moved();
         return "card6";
 
-      } else if (getValue("card4") == symbol && getValue("card7") == symbol && getValue("card1") == "") {
+      } else if (this.getValue("card4") == symbol && this.getValue("card7") == symbol && this.getValue("card1") == "") {
         AI.moved();
         return "card1";
-      } else if (getValue("card5") == symbol && getValue("car8") == symbol && getValue("card2") == "") {
+      } else if (this.getValue("card5") == symbol && this.getValue("car8") == symbol && this.getValue("card2") == "") {
         AI.moved();
         return "card2";
-      } else if (getValue("card6") == symbol && getValue("card9") == symbol && getValue("card3") == "") {
+      } else if (this.getValue("card6") == symbol && this.getValue("card9") == symbol && this.getValue("card3") == "") {
         AI.moved();
         return "card3";
 
 
       } else {
         AI.moved();
-        return randomMove();
+        return this.randomMove();
       }
     }
   }
 
-  const resetboardState = () => {
-    for (i in boardState) {
-      setValue(i.toString(), "");
+  static resetboardState() {
+    for (let i in this.boardState) {
+      this.setValue(i.toString(), "");
     }
   };
-  const playerWinProcess = (index) => {
-    if (checkForWin(players[index].getSymbol()) == players[index].getSymbol()) {
+
+  static playerWinProcess(index) {
+    if (this.checkForWin(players[index].symbol) == players[index].symbol) {
       players[index].win();
       displayController.restart();
 
-    } else if (Object.keys(gameBoard.possibleMoves()).length === 0) {
+    } else if (Object.keys(this.possibleMoves()).length === 0) {
       displayController.restart();
     }
 
   }
-  const processTurn = (e) => {
-    if (boardState[e.target.id] == "") {
-      if (players[0].getTurn()) {
-        setValue(e.target.id, players[0].getSymbol());
+  static processTurn(e) {
+    if (this.boardState[e.target.id] == "") {
+      if (players[0].turn) {
+        this.setValue(e.target.id, players[0].symbol);
         displayController.render();
-        playerWinProcess(0)
-        if (players[1].getAI()) {
-          setValue(move(), players[1].getSymbol());
+        this.playerWinProcess(0)
+        if (players[1].AI) {
+          this.setValue(this.move(), players[1].symbol);
           displayController.render();
-          playerWinProcess("1")
+          this.playerWinProcess("1")
         } else {
 
           players[0].endTurn();
@@ -326,10 +316,10 @@ const gameBoard = (() => {
           p2Symbol.classList.add('turn');
 
         }
-      } else if (players[1].getTurn()) {
-        setValue(e.target.id, players[1].getSymbol());
+      } else if (players[1].turn) {
+        this.setValue(e.target.id, players[1].symbol);
         displayController.render();
-        playerWinProcess(1)
+        this.playerWinProcess(1)
         players[1].endTurn();
         p2Symbol.classList.remove('turn');
         players[0].endTurn();
@@ -338,53 +328,45 @@ const gameBoard = (() => {
     }
   }
 
-  const checkForWin = (value) => {
-    if ((getValue("card1") == value && getValue("card2") == value && getValue("card3") == value)
-      || (getValue("card4") == value && getValue("card5") == value && getValue("card6") == value)
-      || (getValue("card7") == value && getValue("card8") == value && getValue("card9") == value)
+  static checkForWin(value) {
+    if ((this.getValue("card1") == value && this.getValue("card2") == value && this.getValue("card3") == value)
+      || (this.getValue("card4") == value && this.getValue("card5") == value && this.getValue("card6") == value)
+      || (this.getValue("card7") == value && this.getValue("card8") == value && this.getValue("card9") == value)
 
-      || (getValue("card1") == value && getValue("card4") == value && getValue("card7") == value)
-      || (getValue("card2") == value && getValue("card5") == value && getValue("card8") == value)
-      || (getValue("card3") == value && getValue("card6") == value && getValue("card9") == value)
+      || (this.getValue("card1") == value && this.getValue("card4") == value && this.getValue("card7") == value)
+      || (this.getValue("card2") == value && this.getValue("card5") == value && this.getValue("card8") == value)
+      || (this.getValue("card3") == value && this.getValue("card6") == value && this.getValue("card9") == value)
 
-      || (getValue("card1") == value && getValue("card5") == value && getValue("card9") == value)
-      || (getValue("card3") == value && getValue("card5") == value && getValue("card7") == value)
+      || (this.getValue("card1") == value && this.getValue("card5") == value && this.getValue("card9") == value)
+      || (this.getValue("card3") == value && this.getValue("card5") == value && this.getValue("card7") == value)
     ) {
 
       return value;
     }
   }
-  return {
-    getBoardState,
-    getValue,
-    setValue,
-    resetboardState,
-    processTurn,
-    possibleMoves,
-  };
-})();
+}
 
 
-const displayController = (() => {
+class displayController {
 
-  const render = () => {
-    let data = gameBoard.getBoardState();
-    for (i in data) {
+  static render() {
+    let data = gameBoard.boardState;
+    for (let i in data) {
       gameBoard.setValue(i.toString(), data[i]);
     }
 
-    p1Score.innerText = players[0].getStreak();
-    p2Score.innerText = players[1].getStreak();
-    p1Symbol.innerText = players[0].getSymbol();
-    p2Symbol.innerText = players[1].getSymbol();
+    p1Score.innerText = players[0].streak;
+    p2Score.innerText = players[1].streak;
+    p1Symbol.innerText = players[0].symbol;
+    p2Symbol.innerText = players[1].symbol;
   };
-  const addListener = () => {
-    let data = gameBoard.getBoardState();
-    for (i in data) {
+  static addListener() {
+    let data = gameBoard.boardState;
+    for (let i in data) {
       document.getElementById(i.toString()).addEventListener("click", (e) => { gameBoard.processTurn(e) });
     }
   };
-  const getStartData = (e) => {
+  static getStartData(e) {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     let AIBool
@@ -392,22 +374,21 @@ const displayController = (() => {
     let symbol;
     if (formProps.symbol == "O") { symbol = true } else { symbol = false };
     if (AIBool) {
-      players.push(Player("player1", symbol, true))
-      players.push(Player("AI", !symbol, false, true))
-      AI.setDifficulty(formProps.level);
+      players.push(new Player("player1", symbol, true))
+      players.push(new Player("AI", !symbol, false, true))
+      AI.difficulty = formProps.level;
     } else {
-      players.push(Player("player1", symbol, true))
-      players.push(Player("player2", !symbol, false))
+      players.push(new Player("player1", symbol, true))
+      players.push(new Player("player2", !symbol, false))
     }
-    render();
-    addListener();
+    this.render();
+    this.addListener();
   };
-  const restart = () => {
+  static restart() {
     gameBoard.resetboardState();
-
-    render();
+    this.render();
   }
-  const start = () => {
+  static start() {
 
     players = []
     document.getElementById("modal").style.display = "block";
@@ -415,13 +396,14 @@ const displayController = (() => {
     gameBoard.resetboardState();
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      getStartData(e,);
+      this.getStartData(e);
       document.getElementById("modal").style.display = "none";
       document.getElementById("form").reset()
       p2Symbol.classList.remove('turn');
 
       p1Symbol.classList.add('turn');
-
+      form.reset();
+      AIselected.style.display = 'none';
     });
 
     const AIelement = document.getElementById('AI');
@@ -436,20 +418,13 @@ const displayController = (() => {
     });
 
     const btn = document.getElementById("restartBtn");
-    btn.addEventListener("click", () => { start() })
+    btn.addEventListener("click", () => { this.start() })
 
 
 
 
   }
-
-  return {
-    render,
-    start,
-    restart
-  };
-})();
-
+}
 displayController.start();
 
 
